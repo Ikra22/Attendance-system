@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <script>
+        function showSection(sectionId) {
+            var sections = document.querySelectorAll('.dashboard-section');
+            sections.forEach(function(section) {
+                if (section.id === sectionId) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        function markAttendance(status) {
+            var roll_no = "{{ roll_no }}"; // Pass the roll_no dynamically
+            var date = document.getElementById('date').value; // Get the date value from the input field
+    
+            // Prompt for reason if status is ABSENT
+            var reason = null;
+            if (status === 'ABSENT') {
+                reason = prompt('Please enter the reason for absence:');
+            }
+
+            var formData = new FormData();
+            formData.append('roll_no', roll_no);
+            formData.append('status', status);
+            formData.append('date', date); // Include the date in the FormData object
+            formData.append('reason', reason); // Include the reason in the FormData object
+
+            fetch('/give_attendance', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display message
+                document.getElementById('attendance-message').innerText = data.message;
+
+                // Disable buttons
+                document.getElementById('mark-present-btn').disabled = true;
+                document.getElementById('mark-absent-btn').disabled = true;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // function markAttendance(status) {
+        //     var roll_no = "{{ roll_no }}"; // Pass the roll_no dynamically
+        //     var date = document.getElementById('date').value; // Get the date value from the input field
+
+        //     var formData = new FormData();
+        //     formData.append('roll_no', roll_no);
+        //     formData.append('status', status);
+        //     formData.append('date', date); // Include the date in the FormData object
+
+        //     fetch('/give_attendance', {
+        //         method: 'POST',
+        //         body: formData
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         // Display message
+        //         document.getElementById('attendance-message').innerText = data.message;
+
+        //         // Disable buttons
+        //         document.getElementById('mark-present-btn').disabled = true;
+        //         document.getElementById('mark-absent-btn').disabled = true;
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //     });
+        // }
+
+        // -------------------------------------
+
+        // function markAttendance(status) {
+        //     var roll_no = "{{ roll_no }}"; // Pass the roll_no dynamically
+        //     var formData = new FormData();
+        //     formData.append('roll_no', roll_no);
+        //     formData.append('status', status);
+
+        //     fetch('/give_attendance', {
+        //         method: 'POST',
+        //         body: formData
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         alert(data.message); // Display a message from the server response
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //     });
+        // }
+
+        
+    </script>
+
+    <style>body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    
+    h1, h2, h3 {
+        text-align: center;
+    }
+    
+    .buttons {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .buttons button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .buttons button:hover {
+        background-color: #45a049;
+    }
+    
+    .buttons button:focus {
+        outline: none;
+    }
+    
+    .buttons button:active {
+        background-color: #3e8e41;
+    }
+    
+    .dashboard-section {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .dashboard-section input[type="date"] {
+        padding: 8px 10px;
+        border-radius: 3px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+    
+    .dashboard-section button {
+        margin-top: 10px;
+    }
+    
+    #attendance-message {
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Student Dashboard</h1>
+    <div class="buttons">
+        <button onclick="showSection('give-attendance');">Give Attendance</button>
+        <button onclick="location.href='/view_attendance';">View Past Attendance</button>
+        <button onclick="location.href='logout';">Logout</button> <!-- Assuming 'logout' is the endpoint for logout in your Flask app -->
+    </div>
+
+    <!-- Placeholder for Give Attendance section -->
+    <div class="dashboard-section" id="give-attendance" style="display: none;">
+        <h2>Give Attendance Section</h2>
+        <input type="hidden" id="roll_no" name="roll_no" value="{{ roll_no }}">
+
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <div id="attendance-message"> </div>
+
+        <button onclick="markAttendance('PRESENT');">Mark Present</button>
+        <button onclick="markAttendance('ABSENT');">Mark Absent</button>
+    </div>
+
+    <!-- Placeholder for View Past Attendance section -->
+    <!-- <div class="dashboard-section" id="view-attendance" style="display: none;">
+        <h2>View Past Attendance Section</h2>
+
+        <h3>Name: {{ student_name }}</h3>
+        <h3>Roll Number: {{ roll_no }}</h3>
+        <h3>Percentage Attendance: {{ percentage_attendance }}%</h3>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>-->
+</body>
+</html> 
